@@ -1,0 +1,230 @@
+import android.database.Cursor;
+
+import android.os.Build;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.sql.Time;
+
+public class MainActivity extends AppCompatActivity {
+    final static String TAG="SQLITEDBTEST";
+
+    EditText mId;
+    EditText mTitle;
+    EditText mMemo;
+    TimePicker mstartTP;
+    TimePicker mendTP;
+
+    private DBHelper mDbHelper;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mId = (EditText)findViewById(R.id._id);
+        mTitle = (EditText)findViewById(R.id.edit_title);
+        mMemo = (EditText)findViewById(R.id.edit_memo);
+
+        mDbHelper = new DBHelper(this);
+
+        mstartTP = (TimePicker)findViewById(R.id.start_time) ;
+        TextView sttvH = (TextView) findViewById(R.id.resultSTH);  //시작 시
+        TextView sttvM = (TextView) findViewById(R.id.resultSTM);   //시작 분
+        mstartTP.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+            @Override
+            public void onTimeChanged(TimePicker timePicker, int i, int i1) {
+               // sttvH.setText(i);
+               // sttvM.setText(i1);
+                String Shour = String.valueOf(i);
+                String Smin = String.valueOf(i1);
+                sttvH.setText(Shour);
+                sttvM.setText(Smin);
+            }
+        });
+        mendTP = (TimePicker)findViewById(R.id.end_time) ;
+        TextView ettvH = (TextView) findViewById(R.id.resultETH);
+        TextView ettvM = (TextView) findViewById(R.id.resultETM);
+        mendTP.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
+            @Override
+            public void onTimeChanged(TimePicker timePicker, int i, int i1) {
+
+                String Ehour = String.valueOf(i);
+                String Emin = String.valueOf(i1);
+                ettvH.setText(Ehour);
+                ettvM.setText(Emin);
+            }
+        });
+
+        TextView rrsttvH = (TextView) findViewById(R.id.resultSSSTH);
+        TextView rrsttvM = (TextView) findViewById(R.id.resultSSSTM);
+        TextView rrettvH = (TextView) findViewById(R.id.resultEEETH);
+        TextView rrettvM = (TextView) findViewById(R.id.resultEEETM);
+
+        Button button = (Button)findViewById(R.id.insert);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                viewAllToTextView();
+
+                rrsttvH.setText(sttvH.getText());  // 저장부분, 시작 시
+                rrsttvM.setText(sttvM.getText());  // 저장, 시작 분
+                rrettvH.setText(ettvH.getText());
+                rrettvM.setText(ettvM.getText());
+
+                insertRecord();
+                viewAllToListView();
+            }
+        });
+
+        Button button1 = (Button)findViewById(R.id.delete);
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                deleteRecord();
+                //viewAllToTextView();
+                viewAllToListView();
+            }
+        });
+
+        Button button2 = (Button)findViewById(R.id.update);
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateRecord();
+ //               viewAllToTextView();
+               viewAllToListView();
+            }
+        });
+
+        Button button3 = (Button)findViewById(R.id.veiwall);
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+ //               viewAllToTextView();
+                 viewAllToListView();
+
+            }
+        });
+//        viewAllToTextView();
+        viewAllToListView();
+    }
+
+  /*  private void viewAllToTextView() {
+        TextView result = (TextView)findViewById(R.id.result);
+
+        Cursor cursor = mDbHelper.getAllUsersBySQL();
+
+        StringBuffer buffer = new StringBuffer();
+        while (cursor.moveToNext()) {
+            buffer.append(cursor.getInt(0)+" \t");
+            buffer.append(cursor.getString(1)+" \t");
+            buffer.append(cursor.getString(2)+"\n");
+        }
+        result.setText(buffer);
+    }*/
+
+    private void viewAllToListView() {
+
+        Cursor cursor = mDbHelper.getAllUsersByMethod();
+
+        SimpleCursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(),
+                R.layout.item, cursor, new String[]{
+                UserContract.Users._ID,
+                UserContract.Users.KEY_TITLE,
+                UserContract.Users.KEY_STARTH,
+                UserContract.Users.KEY_STARTM,
+                UserContract.Users.KEY_ENDH,
+                UserContract.Users.KEY_ENDM,
+                UserContract.Users.KEY_MEMO},
+                new int[]{R.id._id, R.id.title,R.id.startH,R.id.startM,R.id.endH,R.id.endM, R.id.memo}, 0);
+
+        ListView lv = (ListView)findViewById(R.id.listview);
+        lv.setAdapter(adapter);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Adapter adapter = adapterView.getAdapter();
+
+                mId.setText(((Cursor)adapter.getItem(i)).getString(0));
+                mTitle.setText(((Cursor)adapter.getItem(i)).getString(1));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mstartTP.setHour(((Cursor)adapter.getItem(i)).getInt(2));
+                }
+                mTitle.setText(((Cursor)adapter.getItem(i)).getString(1));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mstartTP.setMinute(((Cursor)adapter.getItem(i)).getInt(3));
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mendTP.setHour(((Cursor)adapter.getItem(i)).getInt(4));
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mendTP.setMinute(((Cursor)adapter.getItem(i)).getInt(5));
+                }
+                mMemo.setText(((Cursor)adapter.getItem(i)).getString(6));
+            }
+        });
+        lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+    }
+
+    private void updateRecord() {
+        EditText _id = (EditText)findViewById(R.id._id);
+        EditText title = (EditText)findViewById(R.id.edit_title);
+        EditText memo = (EditText)findViewById(R.id.edit_memo);
+        TextView rrsttvH = (TextView) findViewById(R.id.resultSSSTH);
+        TextView rrsttvM = (TextView) findViewById(R.id.resultSSSTM);
+        TextView rrettvH = (TextView) findViewById(R.id.resultEEETH);
+        TextView rrettvM = (TextView) findViewById(R.id.resultEEETM);
+
+
+        mDbHelper.updateUserBySQL(_id.getText().toString(), title.getText().toString(), rrsttvH.getText().toString(), rrsttvM.getText().toString(),
+                rrettvH.getText().toString(), rrettvM.getText().toString(), memo.getText().toString());
+//        long nOfRows = mDbHelper.updateUserByMethod(_id.getText().toString(),
+//                name.getText().toString(),
+//                phone.getText().toString());
+//        if (nOfRows >0)
+//            Toast.makeText(this,"Record Updated", Toast.LENGTH_SHORT).show();
+//        else
+//            Toast.makeText(this,"No Record Updated", Toast.LENGTH_SHORT).show();
+    }
+
+    private void deleteRecord() {
+        EditText _id = (EditText)findViewById(R.id._id);
+
+        mDbHelper.deleteUserBySQL(_id.getText().toString());
+//        long nOfRows = mDbHelper.deleteUserByMethod(_id.getText().toString());
+//        if (nOfRows >0)
+//            Toast.makeText(this,"Record Deleted", Toast.LENGTH_SHORT).show();
+//        else
+//            Toast.makeText(this,"No Record Deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void insertRecord() {
+        EditText title = (EditText)findViewById(R.id.edit_title);
+        EditText memo = (EditText)findViewById(R.id.edit_memo);
+        TextView rrsttvH = (TextView) findViewById(R.id.resultSSSTH);
+        TextView rrsttvM = (TextView) findViewById(R.id.resultSSSTM);
+        TextView rrettvH = (TextView) findViewById(R.id.resultEEETH);
+        TextView rrettvM = (TextView) findViewById(R.id.resultEEETM);
+
+        mDbHelper.insertUserBySQL(title.getText().toString(), rrsttvH.getText().toString(), rrsttvM.getText().toString(),
+                rrettvH.getText().toString(),rrettvM.getText().toString(), memo.getText().toString());
+//        long nOfRows = mDbHelper.insertUserByMethod(name.getText().toString(),phone.getText().toString());
+//        if (nOfRows >0)
+//            Toast.makeText(this,nOfRows+" Record Inserted", Toast.LENGTH_SHORT).show();
+//        else
+//            Toast.makeText(this,"No Record Inserted", Toast.LENGTH_SHORT).show();
+    }
+}
