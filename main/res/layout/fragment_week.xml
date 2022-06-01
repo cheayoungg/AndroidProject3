@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/weekview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginLeft="50dp">
+
+        <GridView
+            android:id="@+id/gridview1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="7">
+
+        </GridView>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/design_default_color_primary_dark"
+        >
+
+        <GridView
+            android:drawSelectorOnTop="true"
+            android:background="@color/purple_500"
+            android:horizontalSpacing="2dp"
+            android:verticalSpacing="1dp"
+            android:id="@+id/gridview2"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:listSelector="@drawable/selected"
+            android:numColumns="8"
+            android:stretchMode="columnWidth"
+            android:textAlignment="gravity"
+            android:layout_gravity="fill"></GridView>
+    </LinearLayout>
+
+</LinearLayout>
