@@ -64,6 +64,18 @@ public class DBHelper extends SQLiteOpenHelper {
         return getReadableDatabase().rawQuery(sql,null);
     }
 
+    // 시간정보 없이 데이터베이스를 호출할 때 사용하는 함수
+    public Cursor getDayUsersBySQL(String scheduleYear, String scheduleMonth, String scheduleDay) {
+        String sql = "Select * FROM " + UserContract.Users.TABLE_NAME +" WHERE year= '" + scheduleYear+"' AND Month= '" + scheduleMonth+"' AND Day= '" + scheduleDay+"'";
+        return getReadableDatabase().rawQuery(sql,null);
+    }
+    // 시간정보를 포함하여 데이터베이스를 호출할 때 사용하는 함수
+    public Cursor getHourUsersBySQL(String scheduleYear, String scheduleMonth, String scheduleDay, String scheduleHour) {
+        String sql = "Select * FROM " + UserContract.Users.TABLE_NAME +" WHERE year= '"
+                + scheduleYear+"' AND Month= '" + scheduleMonth+"' AND Day= '" + scheduleDay+"' AND StartTime= '" + scheduleHour+"'";
+        return getReadableDatabase().rawQuery(sql,null);
+    }
+
     public void deleteUserBySQL(String _id) {
         try {
             String sql = String.format (
@@ -112,6 +124,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.query(UserContract.Users.TABLE_NAME,null,null,null,null,null,null);
     }
 
+    //스케줄 엑티비티와 일치하는 데이터 삭제
     public long deleteUserByMethod(String _id) {
         SQLiteDatabase db = getWritableDatabase();
 

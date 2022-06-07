@@ -20,7 +20,9 @@
         android:numColumns="7"
         android:stretchMode="columnWidth"
         android:textAlignment="gravity"
-        android:verticalSpacing="1dp"></GridView>
+        android:verticalSpacing="1dp">
+    </GridView>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

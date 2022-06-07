@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/month_item"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <TextView
+        android:gravity="center_horizontal"
+        android:id="@+id/tv_item_gridview"
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:textSize="20sp"
+        android:background="#ffffff"/>
+    <TextView
+        android:gravity="center_horizontal"
+        android:id="@+id/todo1"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:textSize="20sp"
+        android:background="#ffffff"/>
+    <TextView
+        android:gravity="center_horizontal"
+        android:id="@+id/todo2"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:textSize="20sp"
+        android:background="#ffffff"/>
+
+</LinearLayout>

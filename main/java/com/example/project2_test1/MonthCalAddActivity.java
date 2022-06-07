@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Address;
@@ -69,13 +70,42 @@ public class MonthCalAddActivity extends AppCompatActivity implements OnMapReady
         mTitle = (EditText) findViewById(R.id.edit_title);
         mMemo = (EditText) findViewById(R.id.edit_memo);
         meditMap = (EditText) findViewById(R.id.search);
-
         mDbHelper = new DBHelper(this);
 
-        // 선택된 날짜 정보 받아옴
+                        /*
+                  if (year == 0 || moth ==0)
+                 String id = getIntent().getStringExtra("id",-1);
+                 String title = getIntent().getStringExtra("title",-1);
+                 int startH = getIntent().getIntExtra("startH",-1);
+                 int startM = getIntent().getIntExtra("startM",-1);
+                 int endH = getIntent().getIntExtra("endH",-1);
+                 int endM = getIntent().getIntExtra("endM",-1);
+                 String memo = getIntent().getStringExtra("memo",-1);
+
+                mId.setText(id);
+                mTitle.setText(title);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mstartTP.setHour(startH);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mstartTP.setMinute(startM);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mendTP.setHour(endH);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mendTP.setMinute(endM);
+                }
+                mMemo.setText(memo);
+
+                */
+
+        // 선택된 날짜 정보 받아옴 defaltValue ==-1이라면 if()
         int year = getIntent().getIntExtra("year",0);
         int month = getIntent().getIntExtra("month",0);
         String day = getIntent().getStringExtra("day");
+        // int day = intent.getIntExtra("day", 0);
+        // int hour = intent.getIntExtra("hour", 0);
 
         String Y = String.valueOf(year);
         String M = String.valueOf(month);
@@ -122,12 +152,15 @@ public class MonthCalAddActivity extends AppCompatActivity implements OnMapReady
         TextView rrsttvM = (TextView) findViewById(R.id.resultSSSTM);
         TextView rrettvH = (TextView) findViewById(R.id.resultEEETH);
         TextView rrettvM = (TextView) findViewById(R.id.resultEEETM);
+        Cursor cursor = mDbHelper.getAllUsersBySQL();
 //저장
         Button button = (Button)findViewById(R.id.insert);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                viewAllToTextView();
+               // Intent intent = new Intent(getApplicationContext(), MonthFragment.class);
+                //intent.putExtra("title", String.valueOf(mTitle)); // 그 cusor의 제목을 monthFragment에  전달
 
                 rrsttvH.setText(sttvH.getText());  // 저장부분, 시작 시
                 rrsttvM.setText(sttvM.getText());  // 저장, 시작 분
@@ -136,6 +169,13 @@ public class MonthCalAddActivity extends AppCompatActivity implements OnMapReady
 
                 insertRecord();
                 viewAllToListView();
+
+                //viewListMonth();
+
+                //monthFragment로 이동
+                 MonthFragment monthFragment = new MonthFragment();
+                 getSupportFragmentManager().beginTransaction().replace(R.id.month_fragment,monthFragment).commit();
+
             }
         });
 //삭제
@@ -171,22 +211,16 @@ public class MonthCalAddActivity extends AppCompatActivity implements OnMapReady
 //        viewAllToTextView();
         viewAllToListView();
 
-
-
-/*/ 저장 버튼 누르면 db에 insert or update / 해당 그리드뷰에 제목 출력
-        saveBtn =(Button)findViewById(R.id.save);
-        saveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                      // Fragment로 정보 넘겨줌 : instance?
-                      // monthFragment 로 전환
-            }
-        });*/
-
 //지도
         mapBtn =(Button)findViewById(R.id.searchbtn); //지도 찾기 버튼
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         getLastLocation();
+    }
+
+    // 그리드뷰 i번째 선택
+         public void onTitleSelected(int i) {
+               Intent intent = new Intent(getApplicationContext(), MonthFragment.class);
+               intent.putExtra("gridview_selected", String.valueOf(i));
     }
 
 // 지도 검색, 출력
@@ -267,22 +301,27 @@ public class MonthCalAddActivity extends AppCompatActivity implements OnMapReady
             }
         });
     }
-      /*  private void viewAllToTextView() {
-        TextView result = (TextView)findViewById(R.id.result);
 
+   /* private void viewListMonth(){
         Cursor cursor = mDbHelper.getAllUsersBySQL();
+        int year = getIntent().getIntExtra("year",0);
+        int month = getIntent().getIntExtra("month",0);
+        String day = getIntent().getStringExtra("day");
 
-        StringBuffer buffer = new StringBuffer();
-        while (cursor.moveToNext()) {
-            buffer.append(cursor.getInt(0)+" \t");
-            buffer.append(cursor.getString(1)+" \t");
-            buffer.append(cursor.getString(2)+"\n");
+        String Y = String.valueOf(year);
+        String M = String.valueOf(month);
+
+        while(cursor.moveToNext()){
+            if(cursor.getString(7) == Y && cursor.getString(8)==M && cursor.getString(9) == day){  // 눌러진 곳의 날짜정보와 같은 sql을 찾아서
+                    Intent intent = new Intent(getApplicationContext(), MonthFragment.class);
+                    intent.putExtra("title",cursor.getString(1)); // 그 cusor의 제목을 monthFragment에  전달
+            }
         }
-        result.setText(buffer);
     }*/
 
-    private void viewAllToListView() {
 
+    private void viewAllToListView() {  // 그리드뷰 선택 -> 다이어로그 -> 선택항목 할때
+        // 이걸 monthFragment에 출력할까?
         Cursor cursor = mDbHelper.getAllUsersByMethod();
 
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(),
@@ -307,12 +346,39 @@ public class MonthCalAddActivity extends AppCompatActivity implements OnMapReady
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Adapter adapter = adapterView.getAdapter();
 
+                /*
+                 String id = getIntent().getStringExtra("id",-1);
+                 String title = getIntent().getStringExtra("title",-1);
+                 int startH = getIntent().getIntExtra("startH",-1);
+                 int startM = getIntent().getIntExtra("startM",-1);
+                 int endH = getIntent().getIntExtra("endH",-1);
+                 int endM = getIntent().getIntExtra("endM",-1);
+                 String memo = getIntent().getStringExtra("memo",-1);
+
+                mId.setText(id);
+                mTitle.setText(title);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mstartTP.setHour(startH);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mstartTP.setMinute(startM);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mendTP.setHour(endH);
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mendTP.setMinute(endM);
+                }
+                mMemo.setText(memo);
+
+                */
+
                 mId.setText(((Cursor)adapter.getItem(i)).getString(0));
                 mTitle.setText(((Cursor)adapter.getItem(i)).getString(1));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     mstartTP.setHour(((Cursor)adapter.getItem(i)).getInt(2));
                 }
-                mTitle.setText(((Cursor)adapter.getItem(i)).getString(1));
+               // mTitle.setText(((Cursor)adapter.getItem(i)).getString(1));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     mstartTP.setMinute(((Cursor)adapter.getItem(i)).getInt(3));
                 }
